@@ -599,7 +599,7 @@
             <div>
                 <h2>Valmik Dagu Ugale | ARN-142382</h2>
                 <p>AMFI-registered mutual fund distributor & SIF distributor</p>
-                <p class="tagline">तुमच्या आर्थिक भविष्याचा विश्वासू भागीदार</p>
+                <p class="tagline">तुमच्या आर्थिक भविष्याचा विश्वासू जोडीदार</p>
             </div>
         </div>
         <div class="brand-right">
@@ -1019,7 +1019,7 @@
 
     // ===================== PDF REPORT GENERATION =====================
 
-    const PDF_PX_PER_MM = 4; // resolution used when rasterizing non-Latin text
+    const PDF_PX_PER_MM = 7; // resolution used when rasterizing non-Latin text (~178 DPI equivalent — crisp print quality, moderate file size)
 
     function containsNonLatin(str) {
         return /[^\x00-\x7F]/.test(str);
@@ -1167,11 +1167,13 @@
         doc.setTextColor(90, 90, 90);
         doc.text('AMFI-registered mutual fund distributor & SIF distributor', margin + 22, y + 11);
 
+        pdfSafeText(doc, 'तुमच्या आर्थिक भविष्याचा विश्वासू जोडीदार', margin + 22, y + 16, { fontMM: 3.2, color: '#1e3a8a', weight: 'italic' });
+
         doc.setFontSize(8.5);
         doc.text('Contact: 8087126804  |  valmikugale@gmail.com', pageW - margin, y + 4, { align: 'right' });
         doc.text('Nashik, Maharashtra - 422003', pageW - margin, y + 8, { align: 'right' });
 
-        y += 20;
+        y += 24;
         doc.setDrawColor(30, 58, 138);
         doc.setLineWidth(0.6);
         doc.line(margin, y, pageW - margin, y);
@@ -1195,6 +1197,7 @@
         const rows = [
             ['Current Age', document.getElementById('currentAge').value + ' years'],
             ['Retirement Age', document.getElementById('retireAge').value + ' years'],
+            ['Investment Duration', d.yearsToRetire + ' years'],
             ['Current Monthly Expense', 'Rs. ' + Number(document.getElementById('monthlyExpense').value).toLocaleString('en-IN') + '/month'],
             ['Inflation Rate', document.getElementById('inflationRate').value + '%'],
             ['Pre-Retirement Return', document.getElementById('preReturn').value + '%'],
