@@ -769,7 +769,8 @@
         <!-- Cost of Delay (honest, calculated urgency) -->
         <div class="delay-cost-box" id="delayCostBox" style="display:none;">
             <p>⏳ <strong>१ वर्ष उशीर केल्यास काय फरक पडतो?</strong></p>
-            <p>आजच सुरुवात केल्यास मासिक SIP <strong id="delayNow">₹0</strong> लागेल. १ वर्ष उशीर केल्यास तीच रक्कम <strong id="delayLater">₹0</strong> लागेल — म्हणजे दरमहा <strong id="delayDiff" style="color:#b91c1c;">₹0</strong> जास्त.</p>
+            <p>आजच SIP सुरू केल्यास हे ध्येय <strong id="delayGoalToday">₹0</strong> मध्ये साध्य करता येईल.</p>
+            <p>पण १ वर्ष उशीर केल्यास तुमचा <strong id="delayShortfall" style="color:#b91c1c;">₹0</strong> एवढा कॉर्पस कमी होईल — नुसत्या उशीरामुळे तुम्हाला तब्बल <strong id="delayIncomeLoss" style="color:#b91c1c;">₹0</strong>/महिना एवढी कमी निवृत्ती उत्पन्न मिळेल.</p>
             <p class="delay-cta">योग्य वेळी योग्य पाऊल उचलण्यासाठी — आजच कॉल किंवा WhatsApp करून मार्गदर्शन घ्या. 📞 8087126804</p>
         </div>
 
@@ -884,12 +885,13 @@
 
         // 2. Target Corpus Calculation
         const realRatePost = ((1 + postReturn) / (1 + inflationRate)) - 1;
-        let totalCorpus = 0;
+        let retirementAnnuityFactor;
         if (Math.abs(realRatePost) < 0.0001) {
-            totalCorpus = futureAnnualExpense * yearsInRetirement;
+            retirementAnnuityFactor = yearsInRetirement;
         } else {
-            totalCorpus = futureAnnualExpense * ((1 - Math.pow(1 + realRatePost, -yearsInRetirement)) / realRatePost);
+            retirementAnnuityFactor = (1 - Math.pow(1 + realRatePost, -yearsInRetirement)) / realRatePost;
         }
+        const totalCorpus = futureAnnualExpense * retirementAnnuityFactor;
 
         // 3. Mathematical Logic for SIP calculations
         const r = preReturn / 12;
@@ -900,12 +902,18 @@
         const normalSipMultiplier = ((Math.pow(1 + r, totalMonths) - 1) / r) * (1 + r);
         const normalSIP = totalCorpus / normalSipMultiplier;
 
-        // A2. Cost of Delay: same target corpus, 1 year less to accumulate it
-        let delayedSIP = null;
+        // A2. Cost of Delay: same monthly SIP, but 1 year less to invest it —
+        // resulting corpus shortfall, converted into reduced monthly retirement income
+        let delayShortfallCorpus = null;
+        let delayReducedMonthlyIncome = null;
         if (Y > 1) {
             const delayedMonths = (Y - 1) * 12;
             const delayedMultiplier = ((Math.pow(1 + r, delayedMonths) - 1) / r) * (1 + r);
-            delayedSIP = totalCorpus / delayedMultiplier;
+            const achievedCorpusWithDelay = normalSIP * delayedMultiplier;
+            delayShortfallCorpus = totalCorpus - achievedCorpusWithDelay;
+            if (delayShortfallCorpus > 0) {
+                delayReducedMonthlyIncome = (delayShortfallCorpus / retirementAnnuityFactor) / 12;
+            }
         }
 
         // B. Step-Up % SIP Calculation
@@ -944,6 +952,8 @@
             percentStepUpSIP,
             fixedStepUpSIP,
             fixedStepUpOvershoots,
+            delayShortfallCorpus,
+            delayReducedMonthlyIncome,
             stepUpPercentDisplay: (stepUpPercent * 100) + '%',
             stepUpFixedDisplay: formatINR(stepUpFixed)
         };
@@ -973,10 +983,10 @@
         document.getElementById('lblStepFixed').innerText = globalCalcData.stepUpFixedDisplay;
 
         const delayBoxEl = document.getElementById('delayCostBox');
-        if (delayedSIP !== null && delayedSIP > normalSIP) {
-            document.getElementById('delayNow').innerText = formatINR(normalSIP);
-            document.getElementById('delayLater').innerText = formatINR(delayedSIP);
-            document.getElementById('delayDiff').innerText = formatINR(delayedSIP - normalSIP);
+        if (delayReducedMonthlyIncome !== null && delayReducedMonthlyIncome > 0) {
+            document.getElementById('delayGoalToday').innerText = formatINR(totalCorpus);
+            document.getElementById('delayShortfall').innerText = formatINR(delayShortfallCorpus);
+            document.getElementById('delayIncomeLoss').innerText = formatINR(delayReducedMonthlyIncome);
             delayBoxEl.style.display = 'block';
         } else {
             delayBoxEl.style.display = 'none';
@@ -1053,6 +1063,70 @@
         let drawX = x;
         if (opts.align === 'right') drawX = x - img.wmm;
         doc.addImage(img.dataUrl, 'PNG', drawX, y - fontMM * 0.8, img.wmm, img.hmm);
+    }
+
+    // Wraps + rasterizes a full paragraph (possibly Devanagari/emoji) to fit
+    // a given width, returning a multi-line image ready for doc.addImage().
+    function renderParagraphToImage(text, maxWidthMM, fontMM, color, opts) {
+        opts = opts || {};
+        const weight = opts.weight || 'normal';
+        const align = opts.align || 'left';
+        const lineHeightMM = opts.lineHeightMM || fontMM * 1.5;
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const fontPx = Math.round(fontMM * PDF_PX_PER_MM);
+        const lineHeightPx = Math.round(lineHeightMM * PDF_PX_PER_MM);
+        const maxWidthPx = Math.round(maxWidthMM * PDF_PX_PER_MM);
+        const fontSpec = weight + ' ' + fontPx + 'px "Noto Sans Devanagari", "Nirmala UI", Arial, sans-serif';
+
+        canvas.width = maxWidthPx;
+        canvas.height = 10;
+        ctx.font = fontSpec;
+
+        // word-wrap
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        words.forEach(word => {
+            const test = currentLine ? currentLine + ' ' + word : word;
+            if (ctx.measureText(test).width > maxWidthPx && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+            } else {
+                currentLine = test;
+            }
+        });
+        if (currentLine) lines.push(currentLine);
+
+        canvas.height = lineHeightPx * lines.length + 6;
+        ctx.font = fontSpec; // reset after resize
+        ctx.fillStyle = color;
+        ctx.textBaseline = 'top';
+
+        lines.forEach((line, i) => {
+            let x = 2;
+            if (align === 'center') {
+                x = (maxWidthPx - ctx.measureText(line).width) / 2;
+            }
+            ctx.fillText(line, x, i * lineHeightPx + 2);
+        });
+
+        return {
+            dataUrl: canvas.toDataURL('image/png'),
+            wmm: maxWidthPx / PDF_PX_PER_MM,
+            hmm: canvas.height / PDF_PX_PER_MM
+        };
+    }
+
+    // Adds a new PDF page and resets y if there isn't enough room left
+    function ensureSpace(doc, y, neededMM, margin) {
+        const pageH = doc.internal.pageSize.getHeight();
+        if (y + neededMM > pageH - margin) {
+            doc.addPage();
+            return margin;
+        }
+        return y;
     }
 
     function buildPdfDoc() {
@@ -1197,6 +1271,83 @@
         }
 
         y += 6;
+
+        // --- Cost of Delay Urgency Box (honest, calculated) ---
+        if (d.delayReducedMonthlyIncome && d.delayReducedMonthlyIncome > 0) {
+            const boxW = pageW - margin * 2;
+            const urgencyPara = renderParagraphToImage(
+                'आजच SIP सुरू केल्यास हे ध्येय Rs. ' + Math.round(d.totalCorpus).toLocaleString('en-IN') +
+                ' मध्ये साध्य करता येईल. पण १ वर्ष उशीर केल्यास तुमचा Rs. ' + Math.round(d.delayShortfallCorpus).toLocaleString('en-IN') +
+                ' एवढा कॉर्पस कमी होईल — नुसत्या उशीरामुळे तुम्हाला तब्बल Rs. ' + Math.round(d.delayReducedMonthlyIncome).toLocaleString('en-IN') +
+                '/महिना एवढी कमी निवृत्ती उत्पन्न मिळेल.',
+                boxW - 8, 3.3, '#78350f', { lineHeightMM: 4.6 }
+            );
+            const ctaLine = renderParagraphToImage(
+                'योग्य वेळी योग्य पाऊल उचलण्यासाठी — आजच कॉल किंवा WhatsApp करून मार्गदर्शन घ्या. 8087126804',
+                boxW - 8, 3.3, '#92400e', { weight: 'bold', lineHeightMM: 4.6 }
+            );
+            const boxH = urgencyPara.hmm + ctaLine.hmm + 15;
+            y = ensureSpace(doc, y, boxH + 6, margin);
+
+            doc.setFillColor(255, 251, 235);
+            doc.setDrawColor(253, 230, 138);
+            doc.roundedRect(margin, y, boxW, boxH, 2, 2, 'FD');
+            let innerY = y + 5;
+            doc.addImage(urgencyPara.dataUrl, 'PNG', margin + 4, innerY, urgencyPara.wmm, urgencyPara.hmm);
+            innerY += urgencyPara.hmm + 3;
+            doc.addImage(ctaLine.dataUrl, 'PNG', margin + 4, innerY, ctaLine.wmm, ctaLine.hmm);
+            doc.link(margin, y, boxW, boxH, { url: 'https://wa.me/918087126804' });
+            y += boxH + 8;
+        }
+
+        // --- WhatsApp CTA Banner ---
+        {
+            const boxW = pageW - margin * 2;
+            y = ensureSpace(doc, y, 20, margin);
+            const bannerText = renderParagraphToImage(
+                'संपत्ती निर्मिती | मुलांचं शिक्षण-लग्न खर्च | निवृत्तीनंतर उत्पन्न - मोफत मार्गदर्शनासाठी कॉल / WhatsApp करा 8087126804',
+                boxW - 8, 3.4, '#ffffff', { weight: 'bold', align: 'center', lineHeightMM: 4.8 }
+            );
+            const bannerH = bannerText.hmm + 8;
+            doc.setFillColor(37, 211, 102);
+            doc.roundedRect(margin, y, boxW, bannerH, 2, 2, 'F');
+            doc.addImage(bannerText.dataUrl, 'PNG', margin + 4, y + 4, bannerText.wmm, bannerText.hmm);
+            doc.link(margin, y, boxW, bannerH, { url: 'https://wa.me/918087126804' });
+            y += bannerH + 8;
+        }
+
+        // --- Final CTA ---
+        {
+            const boxW = pageW - margin * 2;
+            const ctaPara1 = renderParagraphToImage(
+                'कॅल्क्युलेटरने तुम्हाला फक्त आवश्यक आकडेवारी दाखवली आहे. पण हा प्लॅन प्रत्यक्षात कसा राबवायचा, योग्य म्युच्युअल फंड योजना कशा निवडायच्या आणि पोर्टफोलिओचे स्ट्रक्चर कसे असावे?',
+                boxW - 8, 3.1, '#166534', { align: 'center', lineHeightMM: 4.4 }
+            );
+            const ctaPara2 = renderParagraphToImage(
+                'हे सविस्तर समजून घेण्यासाठी व तुमच्या सर्व शंकांचे निरसन करण्यासाठी आजच मोफत:',
+                boxW - 8, 3.1, '#166534', { align: 'center', lineHeightMM: 4.4 }
+            );
+            const ctaLine2 = renderParagraphToImage(
+                'WhatsApp मेसेज करा  |  कॉल करा: 8087126804',
+                boxW - 8, 3.6, '#166534', { weight: 'bold', align: 'center', lineHeightMM: 5 }
+            );
+            const ctaBoxH = ctaPara1.hmm + ctaPara2.hmm + ctaLine2.hmm + 18;
+            y = ensureSpace(doc, y, ctaBoxH + 6, margin);
+
+            doc.setFillColor(240, 253, 244);
+            doc.setDrawColor(134, 239, 172);
+            doc.roundedRect(margin, y, boxW, ctaBoxH, 2, 2, 'FD');
+            let cy = y + 6;
+            doc.addImage(ctaPara1.dataUrl, 'PNG', margin + 4, cy, ctaPara1.wmm, ctaPara1.hmm);
+            cy += ctaPara1.hmm + 3;
+            doc.addImage(ctaPara2.dataUrl, 'PNG', margin + 4, cy, ctaPara2.wmm, ctaPara2.hmm);
+            cy += ctaPara2.hmm + 3;
+            doc.addImage(ctaLine2.dataUrl, 'PNG', margin + 4, cy, ctaLine2.wmm, ctaLine2.hmm);
+            doc.link(margin, y, boxW, ctaBoxH, { url: 'https://wa.me/918087126804' });
+            y += ctaBoxH + 8;
+        }
+
+        y = ensureSpace(doc, y, 30, margin);
 
         // --- Disclaimer ---
         doc.setFont('helvetica', 'bold');
