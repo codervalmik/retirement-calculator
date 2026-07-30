@@ -102,9 +102,11 @@
             padding: 14px 16px;
             background: #fffbeb;
             border: 1px solid #fde68a;
+            border-left: 5px solid #d97706;
             border-radius: 8px;
             font-size: 13px;
             color: #4b5563;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.12);
         }
 
         .delay-cost-box p {
@@ -240,7 +242,7 @@
             display: block;
             width: 100%;
             background: #25d366;
-            color: #ffffff;
+            color: #052e12;
             font-weight: 700;
             font-size: 14px;
             text-align: center;
@@ -810,6 +812,7 @@
             <li>Please note that these calculators are for illustrations only and do not represent actual returns.</li>
             <li>Mutual Funds do not have a fixed rate of return and it is not possible to predict the rate of return.</li>
             <li>Mutual Fund Investments are subject to market risks, read all scheme related documents carefully.</li>
+            <li>This report is generated based on the assumptions entered by the client.</li>
         </ol>
     </div>
 
@@ -1322,6 +1325,8 @@
             doc.setFillColor(255, 251, 235);
             doc.setDrawColor(253, 230, 138);
             doc.roundedRect(margin, y, boxW, boxH, 2, 2, 'FD');
+            doc.setFillColor(217, 119, 6);
+            doc.rect(margin, y, 1.8, boxH, 'F');
             let innerY = y + 5;
             doc.addImage(urgencyPara.dataUrl, 'PNG', margin + 4, innerY, urgencyPara.wmm, urgencyPara.hmm);
             innerY += urgencyPara.hmm + 3;
@@ -1336,7 +1341,7 @@
             y = ensureSpace(doc, y, 20, margin);
             const bannerText = renderParagraphToImage(
                 'संपत्ती निर्मिती | मुलांचं शिक्षण-लग्न खर्च | निवृत्तीनंतर उत्पन्न - मोफत मार्गदर्शनासाठी कॉल / WhatsApp करा 8087126804',
-                boxW - 8, 3.4, '#ffffff', { weight: 'bold', align: 'center', lineHeightMM: 4.8 }
+                boxW - 8, 3.4, '#052e12', { weight: 'bold', align: 'center' }
             );
             const bannerH = bannerText.hmm + 8;
             doc.setFillColor(37, 211, 102);
@@ -1390,7 +1395,8 @@
             'Past performance may or may not be sustained in future and is not a guarantee of any future returns.',
             'Please note that these calculators are for illustrations only and do not represent actual returns.',
             'Mutual Funds do not have a fixed rate of return and it is not possible to predict the rate of return.',
-            'Mutual Fund Investments are subject to market risks, read all scheme related documents carefully.'
+            'Mutual Fund Investments are subject to market risks, read all scheme related documents carefully.',
+            'This report is generated based on the assumptions entered by the client.'
         ];
 
         doc.setFont('helvetica', 'normal');
