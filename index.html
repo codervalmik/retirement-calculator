@@ -1183,45 +1183,45 @@
         try {
             const logoImg = document.querySelector('.brand-left img');
             if (logoImg && logoImg.src) {
-                doc.addImage(logoImg.src, 'PNG', margin, y, 18, 16);
+                doc.addImage(logoImg.src, 'PNG', margin, y, 20, 17.7);
             }
         } catch (e) { /* logo optional, continue without it if it fails */ }
 
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(13);
+        doc.setFontSize(15);
         doc.setTextColor(30, 58, 138);
         doc.text('Valmik Dagu Ugale | ARN-142382', margin + 22, y + 6);
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(9);
+        doc.setFontSize(10.5);
         doc.setTextColor(90, 90, 90);
-        doc.text('AMFI-registered mutual fund distributor & SIF distributor', margin + 22, y + 11);
+        doc.text('AMFI-registered mutual fund distributor & SIF distributor', margin + 22, y + 11.5);
 
-        pdfSafeText(doc, 'तुमच्या आर्थिक भविष्याचा विश्वासू जोडीदार', margin + 22, y + 16, { fontMM: 3.2, color: '#1e3a8a', weight: 'italic' });
+        pdfSafeText(doc, 'तुमच्या आर्थिक भविष्याचा विश्वासू जोडीदार', margin + 22, y + 17.5, { fontMM: 4.0, color: '#1e3a8a', weight: 'italic' });
 
-        doc.setFontSize(8.5);
+        doc.setFontSize(10);
         doc.text('Contact: 8087126804  |  valmikugale@gmail.com', pageW - margin, y + 4, { align: 'right' });
-        doc.text('Nashik, Maharashtra - 422003', pageW - margin, y + 8, { align: 'right' });
+        doc.text('Nashik, Maharashtra - 422003', pageW - margin, y + 8.5, { align: 'right' });
 
-        y += 24;
+        y += 27;
         doc.setDrawColor(30, 58, 138);
         doc.setLineWidth(0.6);
         doc.line(margin, y, pageW - margin, y);
-        y += 9;
+        y += 10;
 
         // --- Title ---
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(15);
+        doc.setFontSize(18);
         doc.setTextColor(30, 58, 138);
         doc.text('Retirement & Step-Up SIP Plan', margin, y);
-        y += 8;
+        y += 9;
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10);
+        doc.setFontSize(11.5);
         doc.setTextColor(50, 50, 50);
-        pdfSafeText(doc, 'Client Name: ' + clientName, margin, y, { fontMM: 3.5, color: '#323232' });
+        pdfSafeText(doc, 'Client Name: ' + clientName, margin, y, { fontMM: 4.3, color: '#323232' });
         doc.text('Date: ' + calcDate, pageW - margin, y, { align: 'right' });
-        y += 8;
+        y += 9.5;
 
         // --- Input Parameters ---
         const rows = [
@@ -1234,7 +1234,7 @@
             ['Post-Retirement Return', document.getElementById('postReturn').value + '%'],
         ];
 
-        doc.setFontSize(10.5);
+        doc.setFontSize(12.5);
         rows.forEach(([label, val]) => {
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(70, 70, 70);
@@ -1244,30 +1244,30 @@
             doc.text(val, pageW - margin, y, { align: 'right' });
             doc.setDrawColor(230, 230, 230);
             doc.setLineWidth(0.2);
-            doc.line(margin, y + 2, pageW - margin, y + 2);
-            y += 8;
+            doc.line(margin, y + 2.2, pageW - margin, y + 2.2);
+            y += 9.5;
         });
 
         y += 3;
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
+        doc.setFontSize(13);
         doc.setTextColor(30, 30, 30);
         doc.text('Future Monthly Expense (at retirement)', margin, y);
         doc.text('Rs. ' + Math.round(d.futureMonthlyExpense).toLocaleString('en-IN') + '/month', pageW - margin, y, { align: 'right' });
-        y += 8;
+        y += 9.5;
 
         doc.text('Target Retirement Corpus Needed', margin, y);
         doc.setTextColor(30, 58, 138);
         doc.text('Rs. ' + Math.round(d.totalCorpus).toLocaleString('en-IN'), pageW - margin, y, { align: 'right' });
-        y += 10;
+        y += 11;
 
         // --- SIP Options ---
         doc.setFillColor(30, 58, 138);
-        doc.rect(margin, y - 5, pageW - margin * 2, 8, 'F');
+        doc.rect(margin, y - 6, pageW - margin * 2, 9.5, 'F');
         doc.setTextColor(255, 255, 255);
-        doc.setFontSize(11);
+        doc.setFontSize(13);
         doc.text('Required Monthly SIP Options', margin + 3, y);
-        y += 9;
+        y += 10.5;
 
         const stepUpFixedRaw = Number(document.getElementById('stepUpFixed').value) || 0;
         const sipRows = [
@@ -1279,28 +1279,28 @@
         sipRows.forEach(([label, val], idx) => {
             if (idx % 2 === 0) {
                 doc.setFillColor(240, 253, 244);
-                doc.rect(margin, y - 5, pageW - margin * 2, 8, 'F');
+                doc.rect(margin, y - 6, pageW - margin * 2, 9.5, 'F');
             }
             doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10.5);
+            doc.setFontSize(12.5);
             doc.setTextColor(50, 50, 50);
             doc.text(label, margin + 3, y);
             doc.setFont('helvetica', 'bold');
             doc.setTextColor(21, 128, 61);
             doc.text(val, pageW - margin - 3, y, { align: 'right' });
-            y += 8;
+            y += 9.5;
         });
 
         if (d.fixedStepUpOvershoots) {
             doc.setFont('helvetica', 'italic');
-            doc.setFontSize(8);
+            doc.setFontSize(9.5);
             doc.setTextColor(100, 100, 100);
             const noteLines = doc.splitTextToSize(
                 'Note: The given fixed yearly increase is large enough on its own to reach the goal over this period, so no separate starting SIP is required for this option.',
                 pageW - margin * 2 - 4
             );
             doc.text(noteLines, margin + 3, y);
-            y += noteLines.length * 3.6;
+            y += noteLines.length * 4.2;
         }
 
         y += 6;
@@ -1313,13 +1313,13 @@
                 ' मध्ये साध्य करता येईल. पण १ वर्ष उशीर केल्यास तुमचा Rs. ' + Math.round(d.delayShortfallCorpus).toLocaleString('en-IN') +
                 ' एवढा कॉर्पस कमी होईल — नुसत्या उशीरामुळे तुम्हाला तब्बल Rs. ' + Math.round(d.delayReducedMonthlyIncome).toLocaleString('en-IN') +
                 '/महिना एवढी कमी निवृत्ती उत्पन्न मिळेल.',
-                boxW - 8, 3.3, '#78350f', { lineHeightMM: 4.6 }
+                boxW - 10, 4.0, '#78350f'
             );
             const ctaLine = renderParagraphToImage(
                 'योग्य वेळी योग्य पाऊल उचलण्यासाठी — आजच कॉल किंवा WhatsApp करून मार्गदर्शन घ्या. 8087126804',
-                boxW - 8, 3.3, '#92400e', { weight: 'bold', lineHeightMM: 4.6 }
+                boxW - 10, 4.0, '#92400e', { weight: 'bold' }
             );
-            const boxH = urgencyPara.hmm + ctaLine.hmm + 15;
+            const boxH = urgencyPara.hmm + ctaLine.hmm + 16;
             y = ensureSpace(doc, y, boxH + 6, margin);
 
             doc.setFillColor(255, 251, 235);
@@ -1327,9 +1327,9 @@
             doc.roundedRect(margin, y, boxW, boxH, 2, 2, 'FD');
             doc.setFillColor(217, 119, 6);
             doc.rect(margin, y, 1.8, boxH, 'F');
-            let innerY = y + 5;
+            let innerY = y + 6;
             doc.addImage(urgencyPara.dataUrl, 'PNG', margin + 4, innerY, urgencyPara.wmm, urgencyPara.hmm);
-            innerY += urgencyPara.hmm + 3;
+            innerY += urgencyPara.hmm + 3.5;
             doc.addImage(ctaLine.dataUrl, 'PNG', margin + 4, innerY, ctaLine.wmm, ctaLine.hmm);
             doc.link(margin, y, boxW, boxH, { url: 'https://wa.me/918087126804' });
             y += boxH + 8;
@@ -1338,15 +1338,15 @@
         // --- WhatsApp CTA Banner ---
         {
             const boxW = pageW - margin * 2;
-            y = ensureSpace(doc, y, 20, margin);
+            y = ensureSpace(doc, y, 22, margin);
             const bannerText = renderParagraphToImage(
                 'संपत्ती निर्मिती | मुलांचं शिक्षण-लग्न खर्च | निवृत्तीनंतर उत्पन्न - मोफत मार्गदर्शनासाठी कॉल / WhatsApp करा 8087126804',
-                boxW - 8, 3.4, '#052e12', { weight: 'bold', align: 'center' }
+                boxW - 10, 4.0, '#052e12', { weight: 'bold', align: 'center' }
             );
-            const bannerH = bannerText.hmm + 8;
+            const bannerH = bannerText.hmm + 9;
             doc.setFillColor(37, 211, 102);
             doc.roundedRect(margin, y, boxW, bannerH, 2, 2, 'F');
-            doc.addImage(bannerText.dataUrl, 'PNG', margin + 4, y + 4, bannerText.wmm, bannerText.hmm);
+            doc.addImage(bannerText.dataUrl, 'PNG', margin + 5, y + 4.5, bannerText.wmm, bannerText.hmm);
             doc.link(margin, y, boxW, bannerH, { url: 'https://wa.me/918087126804' });
             y += bannerH + 8;
         }
@@ -1356,40 +1356,40 @@
             const boxW = pageW - margin * 2;
             const ctaPara1 = renderParagraphToImage(
                 'कॅल्क्युलेटरने तुम्हाला फक्त आवश्यक आकडेवारी दाखवली आहे. पण हा प्लॅन प्रत्यक्षात कसा राबवायचा, योग्य म्युच्युअल फंड योजना कशा निवडायच्या आणि पोर्टफोलिओचे स्ट्रक्चर कसे असावे?',
-                boxW - 8, 3.1, '#166534', { align: 'center', lineHeightMM: 4.4 }
+                boxW - 10, 3.7, '#166534', { align: 'center' }
             );
             const ctaPara2 = renderParagraphToImage(
                 'हे सविस्तर समजून घेण्यासाठी व तुमच्या सर्व शंकांचे निरसन करण्यासाठी आजच मोफत:',
-                boxW - 8, 3.1, '#166534', { align: 'center', lineHeightMM: 4.4 }
+                boxW - 10, 3.7, '#166534', { align: 'center' }
             );
             const ctaLine2 = renderParagraphToImage(
                 'WhatsApp मेसेज करा  |  कॉल करा: 8087126804',
-                boxW - 8, 3.6, '#166534', { weight: 'bold', align: 'center', lineHeightMM: 5 }
+                boxW - 10, 4.3, '#166534', { weight: 'bold', align: 'center' }
             );
-            const ctaBoxH = ctaPara1.hmm + ctaPara2.hmm + ctaLine2.hmm + 18;
+            const ctaBoxH = ctaPara1.hmm + ctaPara2.hmm + ctaLine2.hmm + 20;
             y = ensureSpace(doc, y, ctaBoxH + 6, margin);
 
             doc.setFillColor(240, 253, 244);
             doc.setDrawColor(134, 239, 172);
             doc.roundedRect(margin, y, boxW, ctaBoxH, 2, 2, 'FD');
-            let cy = y + 6;
-            doc.addImage(ctaPara1.dataUrl, 'PNG', margin + 4, cy, ctaPara1.wmm, ctaPara1.hmm);
-            cy += ctaPara1.hmm + 3;
-            doc.addImage(ctaPara2.dataUrl, 'PNG', margin + 4, cy, ctaPara2.wmm, ctaPara2.hmm);
-            cy += ctaPara2.hmm + 3;
-            doc.addImage(ctaLine2.dataUrl, 'PNG', margin + 4, cy, ctaLine2.wmm, ctaLine2.hmm);
+            let cy = y + 7;
+            doc.addImage(ctaPara1.dataUrl, 'PNG', margin + 5, cy, ctaPara1.wmm, ctaPara1.hmm);
+            cy += ctaPara1.hmm + 3.5;
+            doc.addImage(ctaPara2.dataUrl, 'PNG', margin + 5, cy, ctaPara2.wmm, ctaPara2.hmm);
+            cy += ctaPara2.hmm + 3.5;
+            doc.addImage(ctaLine2.dataUrl, 'PNG', margin + 5, cy, ctaLine2.wmm, ctaLine2.hmm);
             doc.link(margin, y, boxW, ctaBoxH, { url: 'https://wa.me/918087126804' });
             y += ctaBoxH + 8;
         }
 
-        y = ensureSpace(doc, y, 30, margin);
+        y = ensureSpace(doc, y, 32, margin);
 
         // --- Disclaimer ---
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
+        doc.setFontSize(10.5);
         doc.setTextColor(70, 70, 70);
         doc.text('Disclaimer:', margin, y);
-        y += 5;
+        y += 5.5;
 
         const disclaimerPoints = [
             'Past performance may or may not be sustained in future and is not a guarantee of any future returns.',
@@ -1400,11 +1400,11 @@
         ];
 
         doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
+        doc.setFontSize(9.5);
         disclaimerPoints.forEach((point, idx) => {
             const lines = doc.splitTextToSize((idx + 1) + '. ' + point, pageW - margin * 2 - 4);
             doc.text(lines, margin + 2, y);
-            y += lines.length * 4;
+            y += lines.length * 4.8;
         });
 
         return doc;
