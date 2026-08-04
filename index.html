@@ -1249,11 +1249,14 @@
 
         // Contact block sits on its own row below the name/subtitle/tagline
         // so it never collides with them regardless of text width.
-        pdfSafeText(doc, 'संपर्क: 8087126804', pageW - margin, y + 24, { fontMM: 3.6, color: '#1e293b', align: 'right' });
-        pdfSafeText(doc, 'ईमेल: valmikugale@gmail.com', pageW - margin, y + 29, { fontMM: 3.6, color: '#1e293b', align: 'right' });
-        pdfSafeText(doc, 'नाशिक, महाराष्ट्र - 422003', pageW - margin, y + 34, { fontMM: 3.6, color: '#1e293b', align: 'right' });
+        pdfSafeText(doc, 'संपर्क: 8087126804', pageW - margin, y + 6, { fontMM: 3.6, color: '#1e293b', align: 'right' });
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(10);
+        doc.setTextColor(30, 41, 59);
+        doc.text('valmikugale@gmail.com', pageW - margin, y + 11.5, { align: 'right' });
+        pdfSafeText(doc, 'नाशिक, महाराष्ट्र - 422003', pageW - margin, y + 17, { fontMM: 3.6, color: '#1e293b', align: 'right' });
 
-        y += 40;
+        y += 24;
         doc.setDrawColor(30, 58, 138);
         doc.setLineWidth(0.6);
         doc.line(margin, y, pageW - margin, y);
