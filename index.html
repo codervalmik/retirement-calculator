@@ -191,7 +191,7 @@
             padding: 10px;
             border: none;
             outline: none;
-            font-size: 14px;
+            font-size: 16px;
             color: var(--text);
         }
 
@@ -332,6 +332,45 @@
                 font-weight: 700;
                 box-shadow: 0 4px 14px rgba(0,0,0,0.18);
                 z-index: 5;
+            }
+
+            /* More usable width on small phones */
+            body {
+                padding: 10px 6px;
+            }
+
+            .container {
+                padding: 16px 14px;
+                border-radius: 10px;
+            }
+
+            /* Header reads cleanly when it stacks instead of sitting side-by-side */
+            .brand-right {
+                text-align: left;
+                width: 100%;
+                font-size: 12px;
+            }
+
+            .brand-left h2 {
+                font-size: 19px;
+            }
+
+            /* Result rows: let label/value wrap onto their own lines instead of
+               squeezing together when both are long on a narrow screen */
+            .result-row {
+                flex-wrap: wrap;
+                row-gap: 2px;
+            }
+
+            /* Hero corpus number: scale down slightly so large rupee amounts
+               never get clipped or force horizontal scroll on small phones */
+            .teaser-card-hero .value {
+                font-size: 24px;
+                word-break: break-word;
+            }
+
+            .teaser-card .value {
+                font-size: 19px;
             }
         }
 
@@ -879,8 +918,8 @@
             return;
         }
 
-        const yearsToRetire = retireAge - currentAge;
-        const yearsInRetirement = lifeExpectancy - retireAge;
+        const yearsToRetire = Math.round(retireAge - currentAge);
+        const yearsInRetirement = Math.round(lifeExpectancy - retireAge);
 
         // 1. Future Monthly Expense
         const futureMonthlyExpense = monthlyExpense * Math.pow((1 + inflationRate), yearsToRetire);
@@ -896,13 +935,22 @@
         }
         const totalCorpus = futureAnnualExpense * retirementAnnuityFactor;
 
+        // Annuity-due FV factor for `periods` monthly contributions at monthly
+        // rate `rate`. Guards against rate=0 (e.g. user enters 0% return),
+        // which would otherwise divide by zero — in that case FV is simply
+        // the sum of contributions (no growth).
+        function annuityDueFactor(rate, periods) {
+            if (Math.abs(rate) < 1e-9) return periods;
+            return ((Math.pow(1 + rate, periods) - 1) / rate) * (1 + rate);
+        }
+
         // 3. Mathematical Logic for SIP calculations
         const r = preReturn / 12;
         const Y = yearsToRetire;
         const totalMonths = Y * 12;
 
         // A. Normal SIP Calculation
-        const normalSipMultiplier = ((Math.pow(1 + r, totalMonths) - 1) / r) * (1 + r);
+        const normalSipMultiplier = annuityDueFactor(r, totalMonths);
         const normalSIP = totalCorpus / normalSipMultiplier;
 
         // A2. Cost of Delay: same monthly SIP, but 1 year less to invest it —
@@ -911,7 +959,7 @@
         let delayReducedMonthlyIncome = null;
         if (Y > 1) {
             const delayedMonths = (Y - 1) * 12;
-            const delayedMultiplier = ((Math.pow(1 + r, delayedMonths) - 1) / r) * (1 + r);
+            const delayedMultiplier = annuityDueFactor(r, delayedMonths);
             const achievedCorpusWithDelay = normalSIP * delayedMultiplier;
             delayShortfallCorpus = totalCorpus - achievedCorpusWithDelay;
             if (delayShortfallCorpus > 0) {
@@ -920,7 +968,7 @@
         }
 
         // B. Step-Up % SIP Calculation
-        const year12SipMultiplier = ((Math.pow(1 + r, 12) - 1) / r) * (1 + r);
+        const year12SipMultiplier = annuityDueFactor(r, 12);
         
         let percentStepUpFactorSum = 0;
         for (let y = 1; y <= Y; y++) {
